@@ -51,7 +51,7 @@ To install the application, follow these steps:
 
 To run the application, you can use Docker:
 ```bash
-docker run -p 7000:7000 backstage-app
+docker run -p 7000:7000 backstage
 ```
 
 After running the command, you can access the application at `http://localhost:7000`.
