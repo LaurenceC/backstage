@@ -38,7 +38,7 @@ To install the application, follow these steps:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/LaurenceC/backstage-app.git
+   gh repo clone LaurenceC/backstage
    cd backstage-app
    ```
 
