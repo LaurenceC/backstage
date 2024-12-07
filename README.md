@@ -44,7 +44,7 @@ To install the application, follow these steps:
 
 2. **Build the Docker Image**:
    ```bash
-   docker build -t backstage-app .
+   docker build -t backstage .
    ```
 
 ## Usage
