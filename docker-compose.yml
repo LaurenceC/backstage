@@ -1,0 +1,22 @@
+# docker-compose.yml
+services:
+    backstage-builder:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: builder
+      volumes:
+        - ./app:/app
+
+    backstage:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: runner
+      ports:
+        - "7007:7007"
+      environment:
+        - NODE_ENV=production
+        - BACKSTAGE_APP_NAME=backstage
+      depends_on:
+        - backstage-builder
