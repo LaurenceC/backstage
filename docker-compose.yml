@@ -1,22 +1,28 @@
-# docker-compose.yml
 services:
-    backstage-builder:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: builder
-      volumes:
-        - ./app:/app
+  backstage-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
 
-    backstage:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: runner
-      ports:
-        - "7007:7007"
-      environment:
-        - NODE_ENV=production
-        - BACKSTAGE_APP_NAME=backstage
-      depends_on:
-        - backstage-builder
+  backstage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    ports:
+      - "7007:7007"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=production
+      - BACKSTAGE_APP_NAME=backstage
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - BACKEND_SECRET=${BACKEND_SECRET}
+      - BACKSTAGE_CONFIG_PATH=/app/app-config.yaml
+    env_file:
+      - .env
+    depends_on:
+      - backstage-builder

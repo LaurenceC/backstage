@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: default
+  description: The default organization
+spec:
+  type: organization
+  profile:
+    displayName: Default Organization
+    email: bear@example.com
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: bear
+spec:
+  profile:
+    displayName: Brown Bear
+    email: guest@example.com
+  memberOf: [default]

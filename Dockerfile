@@ -1,33 +1,54 @@
 FROM node:18-bullseye as builder
 
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip make g++ git && \
-    rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
 ENV CI=true
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN npm install -g @backstage/cli && \
-    printf 'backstage-app\n' | npx @backstage/create-app@latest --skip-install && \
-    cd backstage-app && \
-    yarn config set nodeLinker node-modules && \
-    yarn install --no-immutable && \
-    cd packages/backend && \
-    backstage-cli package build && \
-    ls -la dist/ && \
-    find . -name "index.js"
+# Create app non-interactively
+RUN printf 'backstage-app\n' | npx @backstage/create-app@latest
+
+WORKDIR /app/backstage-app
+
+# Copy configuration files
+COPY app-config.yaml app-config.production.yaml ./
+
+# Build backend
+RUN cd packages/backend && \
+    yarn build
 
 FROM node:18-bullseye-slim as runner
 
-WORKDIR /app
+WORKDIR /app/backstage-app
 
+# Copy the entire backstage-app directory
 COPY --from=builder /app/backstage-app .
 
+# Install runtime dependencies
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip make g++ git && \
-    yarn install
+    apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    make \
+    g++ \
+    git \
+    sqlite3 \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    curl -fsSL https://get.docker.com -o get-docker.sh && \
+    sh get-docker.sh && \
+    rm get-docker.sh && \
+    pip3 install mkdocs-techdocs-core && \
+    # Cleanup
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app/packages/backend
+ENV NODE_ENV=production
+ENV BACKSTAGE_CONFIG_PATH=/app/backstage-app/app-config.yaml
+
+WORKDIR /app/backstage-app/packages/backend
+
 CMD ["yarn", "start"]

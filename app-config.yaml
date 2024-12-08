@@ -1,5 +1,5 @@
 app:
-  title: Backstage
+  title: Backstage App
   baseUrl: http://localhost:7007
 
 backend:
@@ -9,12 +9,10 @@ backend:
   cors:
     origin: http://localhost:7007
     methods: [GET, POST, PUT, DELETE]
-    credentials: false
-
-# This is for local development only
-auth:
-  environment: development
-  providers: {}
+    credentials: true
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
 
 catalog:
   locations:

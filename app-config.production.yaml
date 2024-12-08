@@ -1,4 +1,5 @@
 app:
+  title: Backstage
   baseUrl: http://localhost:7007
 
 backend:
@@ -9,7 +10,55 @@ backend:
     origin: http://localhost:7007
     methods: [GET, POST, PUT, DELETE]
     credentials: true
+    # Add database for session storage
+    database:
+      client: better-sqlite3
+      connection: ':memory:'
 
++ techdocs:
++   builder: 'local'
++   generator:
++     runIn: 'docker'
++   publisher:
++     type: 'local'
++   reader:
++     allowedLocations: ['.*']
+
+# This is for local development only
 auth:
   environment: production
-  providers: {}
+  keys:
+    - secret: ${BACKEND_SECRET}
+  providers:
+    github:
+      production:
+        clientId: ${GITHUB_CLIENT_ID}
+        clientSecret: ${GITHUB_CLIENT_SECRET}
+        #enterpriseInstanceUrl: # Optional, for GitHub Enterprise
+        scope: 'read:user read:org repo'
+        # Add these for better session handling
+        sessionTimeoutSeconds: 7200
+        callbackUrl: http://localhost:7007/api/auth/github/handler/frame
+
+# Add sign-in configuration
+signIn:
+  resolver: '@backstage/plugin-auth-backend'
+  providers:
+    github:
+      development:
+        resolvers:
+          - resolver: '@backstage/plugin-auth-node'
+            userIdResolver: (claims) => claims.sub
+
+catalog:
+  locations:
+    - type: file
+      target: ../../catalog-info.yaml
+
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+      # Add these for better API handling
+      apiBaseUrl: https://api.github.com
+      rawBaseUrl: https://raw.githubusercontent.com
